@@ -31,7 +31,6 @@ jobs:
 
       - name: Sync each client folder
         run: |
-          set -e
           count=$(jq length sync-map.json)
           for i in $(seq 0 $((count - 1))); do
             cpath=$(jq -r ".[$i].path" sync-map.json)
@@ -43,7 +42,10 @@ jobs:
             echo "Syncing $cpath from Drive folder $fid"
             inc="$RUNNER_TEMP/incoming/$cpath"
             mkdir -p "$inc" "$cpath"
-            rclone copy --drive-service-account-file "$RUNNER_TEMP/sa.json" --drive-root-folder-id "$fid" --drive-acknowledge-abuse --exclude "*(posted)*/**" ":drive:" "$inc"
+            if ! rclone copy --drive-service-account-file "$RUNNER_TEMP/sa.json" --drive-root-folder-id "$fid" --drive-acknowledge-abuse --exclude "*(posted)*/**" ":drive:" "$inc"; then
+              echo "::warning::Could not read Drive folder for $cpath - is it shared with the service account? Skipping."
+              continue
+            fi
             find "$inc" -type f 2>/dev/null | while IFS= read -r f; do
               rel="${f#"$inc"/}"
               case "$rel" in *"(posted)"*) continue ;; esac
@@ -52,7 +54,7 @@ jobs:
               out="$cpath/$base.mp4"
               [ -f "$out" ] && continue
               case "$ext" in
-                mov|MOV|m4v|M4V) ffmpeg -y -i "$f" -c copy -movflags +faststart "$out" ;;
+                mov|MOV|m4v|M4V) ffmpeg -y -i "$f" -c copy -movflags +faststart "$out" || echo "convert failed: $f" ;;
                 mp4|MP4) cp "$f" "$out" ;;
               esac
             done
