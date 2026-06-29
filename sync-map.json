@@ -1,7 +1,3 @@
 [
-  { "path": "drunken-monkey",        "folder_id": "1NLZCrz7z8WCjLQsGvp-FzixPieOCXK_H" },
-  { "path": "drunken-monkey-hostel", "folder_id": "1KzpXV7M-VFH3Md6toPQOvHcROgONg4aR" },
-  { "path": "rozmberk",              "folder_id": "1lMKlF-nw75jt7b7WofcyBhwuHkgQAQEF" },
-  { "path": "philly-and-cos",        "folder_id": "1qFGzFgnXmjS9pibwHUgAAhr9m66HuGTT" },
-  { "path": "other",                 "folder_id": "" }
+  { "path": "drunken-monkey-hostel", "folder_id": "1KzpXV7M-VFH3Md6toPQOvHcROgONg4aR", "file": "frat party.mov" }
 ]
