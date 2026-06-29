@@ -35,22 +35,29 @@ jobs:
           for i in $(seq 0 $((count - 1))); do
             cpath=$(jq -r ".[$i].path" sync-map.json)
             fid=$(jq -r ".[$i].folder_id" sync-map.json)
+            fname=$(jq -r ".[$i].file // empty" sync-map.json)
             if [ -z "$fid" ] || [ "$fid" = "null" ]; then
               echo "Skipping $cpath (no folder id set)"
               continue
             fi
-            echo "Syncing $cpath from Drive folder $fid"
+            echo "Syncing $cpath from Drive folder $fid (file: ${fname:-all})"
             inc="$RUNNER_TEMP/incoming/$cpath"
             mkdir -p "$inc" "$cpath"
-            if ! rclone copy --drive-service-account-file "$RUNNER_TEMP/sa.json" --drive-root-folder-id "$fid" --drive-acknowledge-abuse --exclude "*(posted)*/**" ":drive:" "$inc"; then
-              echo "::warning::Could not read Drive folder for $cpath - is it shared with the service account? Skipping."
+            rc_ok=1
+            if [ -n "$fname" ]; then
+              rclone copy --drive-service-account-file "$RUNNER_TEMP/sa.json" --drive-root-folder-id "$fid" --drive-acknowledge-abuse --include "$fname" ":drive:" "$inc" || rc_ok=0
+            else
+              rclone copy --drive-service-account-file "$RUNNER_TEMP/sa.json" --drive-root-folder-id "$fid" --drive-acknowledge-abuse --exclude "*(posted)*/**" ":drive:" "$inc" || rc_ok=0
+            fi
+            if [ "$rc_ok" = "0" ]; then
+              echo "::warning::Could not read Drive folder for $cpath. Skipping."
               continue
             fi
             find "$inc" -type f -print0 2>/dev/null | while IFS= read -r -d '' f; do
               rel="${f#"$inc"/}"
               case "$rel" in *"(posted)"*) continue ;; esac
               ext="${f##*.}"
-              base="$(basename "${f%.*}")"
+              base="$(basename "${f%.*}" | tr ' ' '-')"
               out="$cpath/$base.mp4"
               [ -f "$out" ] && continue
               case "$ext" in
