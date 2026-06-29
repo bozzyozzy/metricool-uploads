@@ -59,11 +59,17 @@ jobs:
               ext="${f##*.}"
               base="$(basename "${f%.*}" | tr ' ' '-')"
               out="$cpath/$base.mp4"
-              [ -f "$out" ] && continue
-              case "$ext" in
-                mov|MOV|m4v|M4V) ffmpeg -nostdin -y -i "$f" -c copy -movflags +faststart "$out" || echo "convert failed: $f" ;;
-                mp4|MP4) cp -- "$f" "$out" || echo "copy failed: $f" ;;
-              esac
+              pdir="$cpath/_previews/$base"
+              if [ ! -d "$pdir" ]; then
+                mkdir -p "$pdir"
+                ffmpeg -nostdin -y -i "$f" -vf "fps=1/3,scale=400:-1" -frames:v 8 "$pdir/frame-%02d.jpg" || echo "frames failed: $f"
+              fi
+              if [ ! -f "$out" ]; then
+                case "$ext" in
+                  mov|MOV|m4v|M4V) ffmpeg -nostdin -y -i "$f" -c copy -movflags +faststart "$out" || echo "convert failed: $f" ;;
+                  mp4|MP4) cp -- "$f" "$out" || echo "copy failed: $f" ;;
+                esac
+              fi
             done
           done
 
@@ -71,7 +77,7 @@ jobs:
         run: |
           git config user.name "BeeBigger Bot"
           git config user.email "info@beebigger.com"
-          git add -- '*.mp4'
+          git add -A
           if git diff --staged --quiet; then
             echo "No new media to commit."
           else
