@@ -32,27 +32,29 @@ jobs:
       - name: Sync each client folder
         run: |
           set -e
-          shopt -s nullglob
           count=$(jq length sync-map.json)
           for i in $(seq 0 $((count - 1))); do
-            path=$(jq -r ".[$i].path" sync-map.json)
+            cpath=$(jq -r ".[$i].path" sync-map.json)
             fid=$(jq -r ".[$i].folder_id" sync-map.json)
             if [ -z "$fid" ] || [ "$fid" = "null" ]; then
-              echo "Skipping $path (no folder id set)"
+              echo "Skipping $cpath (no folder id set)"
               continue
             fi
-            echo "Syncing $path from Drive folder $fid"
-            inc="$RUNNER_TEMP/incoming/$path"
-            mkdir -p "$inc" "$path"
-            rclone copy --drive-service-account-file "$RUNNER_TEMP/sa.json" --drive-root-folder-id "$fid" --drive-acknowledge-abuse --include "*.{mov,MOV,mp4,MP4,m4v,M4V}" ":drive:" "$inc"
-            for f in "$inc"/*.[mM][oO][vV] "$inc"/*.[mM]4[vV]; do
-              [ -e "$f" ] || continue
-              name="$(basename "${f%.*}")"
-              ffmpeg -y -i "$f" -c copy -movflags +faststart "$path/${name}.mp4"
-            done
-            for f in "$inc"/*.[mM][pP]4; do
-              [ -e "$f" ] || continue
-              cp -n "$f" "$path/$(basename "$f")"
+            echo "Syncing $cpath from Drive folder $fid"
+            inc="$RUNNER_TEMP/incoming/$cpath"
+            mkdir -p "$inc" "$cpath"
+            rclone copy --drive-service-account-file "$RUNNER_TEMP/sa.json" --drive-root-folder-id "$fid" --drive-acknowledge-abuse --exclude "*(posted)*/**" ":drive:" "$inc"
+            find "$inc" -type f 2>/dev/null | while IFS= read -r f; do
+              rel="${f#"$inc"/}"
+              case "$rel" in *"(posted)"*) continue ;; esac
+              ext="${f##*.}"
+              base="$(basename "${f%.*}")"
+              out="$cpath/$base.mp4"
+              [ -f "$out" ] && continue
+              case "$ext" in
+                mov|MOV|m4v|M4V) ffmpeg -y -i "$f" -c copy -movflags +faststart "$out" ;;
+                mp4|MP4) cp "$f" "$out" ;;
+              esac
             done
           done
 
