@@ -67,11 +67,20 @@ jobs:
               fi
               if [ ! -f "$out" ]; then
                 w=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 "$f" 2>/dev/null | head -1)
+                c=$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 "$f" 2>/dev/null | head -1)
+                why=""
+                case "$c" in hevc|hev1|hvc1) why="codec $c is not H.264" ;; esac
                 if [ -n "$w" ] && [ "$w" -gt 1920 ] 2>/dev/null; then
-                  echo "::notice::$rel is ${w}px wide. Instagram caps at 1920, downscaling to 1080."
-                  ffmpeg -nostdin -y -i "$f" -vf "scale=1080:-2:flags=lanczos" \
+                  why="${why:+$why and }${w}px is over Instagram's 1920 cap"
+                  vf="scale=1080:-2:flags=lanczos"
+                else
+                  vf="scale=trunc(iw/2)*2:trunc(ih/2)*2"
+                fi
+                if [ -n "$why" ]; then
+                  echo "::notice::$rel re-encoded to H.264 because $why"
+                  ffmpeg -nostdin -y -i "$f" -vf "$vf" \
                     -c:v libx264 -crf 20 -preset slow -pix_fmt yuv420p \
-                    -c:a aac -b:a 192k -movflags +faststart "$out" || echo "downscale failed: $f"
+                    -c:a aac -b:a 192k -movflags +faststart "$out" || echo "encode failed: $f"
                 else
                   case "$ext" in
                     mov|MOV|m4v|M4V) ffmpeg -nostdin -y -i "$f" -c copy -movflags +faststart "$out" || echo "convert failed: $f" ;;
