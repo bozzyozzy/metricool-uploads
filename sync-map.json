@@ -1,4 +1,14 @@
 [
-  { "path": "drunken-monkey-hostel", "folder_id": "1KzpXV7M-VFH3Md6toPQOvHcROgONg4aR", "file": "frat party.mov" },
-  { "path": "blaze", "folder_id": "1tRYAJyPlMVUWwKnkDYFFPRTkiERwDGXI" }
+  {"path": "drunken-monkey-hostel", "folder_id": "1KzpXV7M-VFH3Md6toPQOvHcROgONg4aR", "file": "frat party.mov"},
+  {"path": "blaze", "folder_id": "1tRYAJyPlMVUWwKnkDYFFPRTkiERwDGXI"},
+  {"path": "philly-and-cos", "folder_id": "1tKLuodGK0rVAnaLNB0F8cqxx_-syQcYz", "file": "philly-dinner-n-drinks.mp4", "keep_codec": true},
+  {"path": "philly-and-cos", "folder_id": "1tKLuodGK0rVAnaLNB0F8cqxx_-syQcYz", "file": "philly-forgot-their-order.mp4", "keep_codec": true},
+  {"path": "philly-and-cos", "folder_id": "1tKLuodGK0rVAnaLNB0F8cqxx_-syQcYz", "file": "philly-for-you-page.mov", "keep_codec": true},
+  {"path": "philly-and-cos", "folder_id": "1tKLuodGK0rVAnaLNB0F8cqxx_-syQcYz", "file": "philly-this-and-no-stress.mp4", "keep_codec": true},
+  {"path": "philly-and-cos", "folder_id": "1tKLuodGK0rVAnaLNB0F8cqxx_-syQcYz", "file": "philly-ill-pay.mp4", "keep_codec": true},
+  {"path": "philly-and-cos", "folder_id": "1tKLuodGK0rVAnaLNB0F8cqxx_-syQcYz", "file": "philly-monday-to-sunday.mov", "keep_codec": true},
+  {"path": "philly-and-cos", "folder_id": "1tKLuodGK0rVAnaLNB0F8cqxx_-syQcYz", "file": "philly-10-10-service.mp4", "keep_codec": true},
+  {"path": "philly-and-cos", "folder_id": "1tKLuodGK0rVAnaLNB0F8cqxx_-syQcYz", "file": "philly-one-drink-turns-into-three.mp4", "keep_codec": true},
+  {"path": "philly-and-cos", "folder_id": "1tKLuodGK0rVAnaLNB0F8cqxx_-syQcYz", "file": "philly-food-gonna-be-good.mov", "keep_codec": true},
+  {"path": "philly-and-cos", "folder_id": "1tKLuodGK0rVAnaLNB0F8cqxx_-syQcYz", "file": "philly-forgot-the-customer.mp4", "keep_codec": true}
 ]
