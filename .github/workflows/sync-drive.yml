@@ -36,6 +36,7 @@ jobs:
             cpath=$(jq -r ".[$i].path" sync-map.json)
             fid=$(jq -r ".[$i].folder_id" sync-map.json)
             fname=$(jq -r ".[$i].file // empty" sync-map.json)
+            keep=$(jq -r ".[$i].keep_codec // false" sync-map.json)
             if [ -z "$fid" ] || [ "$fid" = "null" ]; then
               echo "Skipping $cpath (no folder id set)"
               continue
@@ -69,7 +70,10 @@ jobs:
                 w=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=p=0 "$f" 2>/dev/null | head -1)
                 c=$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 "$f" 2>/dev/null | head -1)
                 why=""
-                case "$c" in hevc|hev1|hvc1) why="codec $c is not H.264" ;; esac
+                # keep_codec: true in sync-map.json leaves HEVC untouched (lossless remux or copy)
+                if [ "$keep" != "true" ]; then
+                  case "$c" in hevc|hev1|hvc1) why="codec $c is not H.264" ;; esac
+                fi
                 if [ -n "$w" ] && [ "$w" -gt 1920 ] 2>/dev/null; then
                   why="${why:+$why and }${w}px is over Instagram's 1920 cap"
                   vf="scale=1080:-2:flags=lanczos"
